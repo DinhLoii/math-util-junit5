@@ -1,4 +1,4 @@
-name: CI with GitHub Actions using Maven and JUnit | © 2022 by 
+name: CI with GitHub Actions using Maven and JUnit | © 2022 by DinhLoii
 
 # Workflow này dùng để build project Java với Maven + JUnit
 # Tham khảo:
