@@ -1,0 +1,52 @@
+name: CI with GitHub Actions using Maven and JUnit | © 2022 by 
+
+# Workflow này dùng để build project Java với Maven + JUnit
+# Tham khảo:
+# https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+on:
+  push:
+    branches: [ main ] # Lấy code từ nhánh main nếu có ai push code lên
+  pull_request:
+    branches: [ main ] # Lấy code từ nhánh main nếu có ai gửi pull request
+
+# Một workflow gồm nhiều job, có thể chạy song song hoặc tuần tự
+jobs: # Những công việc dev làm thường ngày: lấy code, build, chạy test, đóng gói, gửi build...
+  
+  # Workflow này chỉ có 1 job tên là build
+  build:
+    # Khai báo máy ảo mà GitHub sẽ cấp để chạy CI
+    runs-on: ubuntu-latest
+
+    # Các bước thực thi trong job
+    steps:
+      # Lấy source code từ repository về máy ảo GitHub
+      - name: Check-out repository # Lấy code từ kho thảy vào máy ảo của GitHub chuẩn bị build
+        uses: actions/checkout@v4
+
+      # Cài đặt JDK để build project
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3 # Khai báo cần dùng JDK để build
+        with:
+          java-version: '21'        # Sử dụng JDK 21 (phù hợp NetBeans 17)
+          distribution: 'temurin'   # Bản OpenJDK phổ biến, ổn định
+          cache: maven              # Cache thư viện Maven để build nhanh hơn
+
+      # Build project và chạy test JUnit
+      - name: Build project with Maven
+        run: mvn -B clean package --file pom.xml # Quá trình build dùng file pom.xml
+
+      # Gom file .jar sau khi build
+      - name: Distribute jar file # Chuẩn bị file build cho bước CD hoặc download
+        run: |
+          mkdir staging
+          cp target/*.jar staging  # Copy file .jar vào thư mục staging
+
+      # Tạo hyperlink để download file .jar
+      - name: Make hyperlink to jar file # Upload artifact để tải bản build
+        uses: actions/upload-artifact@v4
+        with:
+          name: 1.0-SNAPSHOT.jar   # Tên bản build
+          path: staging
+
+# End of CI workflow file
